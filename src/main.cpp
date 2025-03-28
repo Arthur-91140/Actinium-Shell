@@ -4,9 +4,7 @@
 #include <locale>
 #include <codecvt>
 #include <cstdlib>
-#ifdef _WIN32
 #include <windows.h>
-#endif
 
 void processCommand(const std::string& input) {
     std::istringstream iss(input);
@@ -29,12 +27,7 @@ void processCommand(const std::string& input) {
 }
 
 int main() {
-    #ifdef _WIN32
-    SetConsoleOutputCP(65001);
-    #else
-    std::locale::global(std::locale("fr_FR.UTF-8"));
-    std::cout.imbue(std::locale());
-    #endif
+    SetConsoleOutputCP(65001); // Set UTF-8 code page for Windows console
 
     std::string input;
     
