@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <windows.h>
 #include "./include/command-processor.h"
+#include "./include/init.h"
 
 void processCommand(const std::string& input) {
     std::istringstream iss(input);
