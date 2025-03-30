@@ -5,6 +5,5 @@
 #include <codecvt>
 #include <cstdlib>
 #include <windows.h>
-#include "./command-processor.h"
 
 void banner();
