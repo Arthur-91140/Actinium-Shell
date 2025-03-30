@@ -7,3 +7,16 @@
 #include <windows.h>
 #include "./include/command-processor.h"
 #include "./include/init.h"
+
+void banner() {
+    std::cout << "▄▄▄       ▄████▄  ▄▄▄█████▓ ██▓ ███▄    █  ██▓ █    ██  ███▄ ▄███▓    " << std::endl;
+    std::cout << "▒████▄    ▒██▀ ▀█  ▓  ██▒ ▓▒▓██▒ ██ ▀█   █ ▓██▒ ██  ▓██▒▓██▒▀█▀ ██▒   " << std::endl;
+    std::cout << "▒██  ▀█▄  ▒▓█    ▄ ▒ ▓██░ ▒░▒██▒▓██  ▀█ ██▒▒██▒▓██  ▒██░▓██    ▓██░   " << std::endl;
+    std::cout << "░██▄▄▄▄██ ▒▓▓▄ ▄██▒░ ▓██▓ ░ ░██░▓██▒  ▐▌██▒░██░▓▓█  ░██░▒██    ▒██    " << std::endl; 
+    std::cout << " ▓█   ▓██▒▒ ▓███▀ ░  ▒██▒ ░ ░██░▒██░   ▓██░░██░▒▒█████▓ ▒██▒   ░██▒   " << std::endl;
+    std::cout << " ▒▒   ▓▒█░░ ░▒ ▒  ░  ▒ ░░   ░▓  ░ ▒░   ▒ ▒ ░▓  ░▒▓▒ ▒ ▒ ░ ▒░   ░  ░   " << std::endl;
+    std::cout << "  ▒   ▒▒ ░  ░  ▒       ░     ▒ ░░ ░░   ░ ▒░ ▒ ░░░▒░ ░ ░ ░  ░      ░   " << std::endl;
+    std::cout << "  ░   ▒   ░          ░       ▒ ░   ░   ░ ░  ▒ ░ ░░░ ░ ░ ░      ░      " << std::endl;
+    std::cout << "      ░  ░░ ░                ░           ░  ░     ░            ░      " << std::endl;
+    std::cout << "          ░                                                        
+}
