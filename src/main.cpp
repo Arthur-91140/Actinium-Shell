@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <windows.h>
 #include "./include/command-processor.h"
+#include "./include/init.h"
 
 int main() {
     SetConsoleOutputCP(65001); // Set UTF-8 code page for Windows console
