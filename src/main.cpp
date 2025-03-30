@@ -1,3 +1,5 @@
+// Ecrit avec amour par Arthur Pruvost Rivière ^_.\^
+
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -12,7 +14,7 @@ int main() {
 
     std::string input;
     
-    std::cout << "Terminal personnalisé démarré. 🚀\n";
+    banner();   // Display the banner
     std::cout << "Commandes disponibles : hello [nom], exit\n";
 
     while (true) {
