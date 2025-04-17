@@ -13,13 +13,18 @@
 int main() {
     SetConsoleOutputCP(65001); // Set UTF-8 code page for Windows console
 
+    // Initialiser le répertoire courant
+    char buffer[MAX_PATH];
+    GetCurrentDirectoryA(MAX_PATH, buffer);
+    currentDirectory = buffer;
+
     std::string input;
     
     banner();   // Display the banner
-    std::cout << "Commandes disponibles : hello [nom], exit\n";
+    std::cout << "Commandes disponibles : hello [nom], ls [chemin], cd [chemin], pwd, exit\n";
 
     while (true) {
-        std::cout << "> ";
+        std::cout << currentDirectory << "> ";  // Afficher le répertoire courant dans le prompt
         std::getline(std::cin, input);
 
         if (!input.empty()) {
