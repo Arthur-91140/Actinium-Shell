@@ -1,4 +1,5 @@
-// Ecrit avec amour par Arthur Pruvost Rivière ^_.\^
+// main.cpp
+// Written with love by Arthur Pruvost Rivière ^_.\^
 
 #include <iostream>
 #include <string>
@@ -13,13 +14,21 @@
 int main() {
     SetConsoleOutputCP(65001); // Set UTF-8 code page for Windows console
 
+    // Initialize the command system
+    initializeCommandSystem();
+
+    // Initialize the current directory
+    char buffer[MAX_PATH];
+    GetCurrentDirectoryA(MAX_PATH, buffer);
+    currentDirectory = buffer;
+
     std::string input;
     
     banner();   // Display the banner
-    std::cout << "Commandes disponibles : hello [nom], exit\n";
+    std::cout << "Welcome to ACTINIUM Shell - Type 'help' for available commands\n";
 
     while (true) {
-        std::cout << "> ";
+        std::cout << currentDirectory << "> ";  // Display current directory in prompt
         std::getline(std::cin, input);
 
         if (!input.empty()) {
