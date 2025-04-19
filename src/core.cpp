@@ -6,7 +6,7 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
-#include "../include/core.h"
+#include "./include/core.h"
 
 #pragma comment(lib, "wininet.lib")
 #pragma comment(lib, "advapi32.lib")
