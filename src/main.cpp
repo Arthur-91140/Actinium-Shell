@@ -10,7 +10,6 @@
 #include <windows.h>
 #include "./include/command-processor.h"
 #include "./include/init.h"
-#include "./include/core.h"
 #include "./include/installer.h"
 
 
