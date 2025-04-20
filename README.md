@@ -103,7 +103,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Acknowledgements
 I would like to thank Terry A. Davis for his work on operating systems and the Saint C from
 which I get the idea of the JIT compilation.
-" Someone said that the smaller your duties, the better. Bad advice" (Terry A. Davis 1969-2018)
+>" Someone said that the smaller your duties, the better. Bad advice" (Terry A. Davis 1969-2018)
 
 ## Author
 
