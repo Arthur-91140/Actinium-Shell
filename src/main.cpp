@@ -1,5 +1,5 @@
 // main.cpp
-// Written with love by Arthur Pruvost Rivière ^_.\^
+// Written with love by Arthur Pruvost Rivière ^^
 
 #include <iostream>
 #include <string>
