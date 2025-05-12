@@ -26,10 +26,9 @@ int main() {
     std::string input;
     
     banner();   // Display the banner
-    std::cout << "Welcome to ACTINIUM Shell - Type 'help' for available commands\n";
 
     while (true) {
-        std::cout << currentDirectory << "> ";  // Display current directory in prompt
+        std::cout << "AC " << currentDirectory << "> ";  // Display current directory in prompt
         std::getline(std::cin, input);
 
         if (!input.empty()) {
