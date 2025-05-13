@@ -7,3 +7,5 @@
 #include <windows.h>
 
 void banner();
+
+string GetUserFolderPath();
