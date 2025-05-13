@@ -14,7 +14,7 @@
 // Global variables
 std::string currentDirectory = ".";  // Current directory
 std::map<std::string, CommandModule> loadedCommands;
-std::string commandsDirectory = GetUserFolderPath + "\\commands";
+std::string commandsDirectory = GetUserFolderPath() + "\\commands";
 
 // Create a template for new commands
 void createCommandTemplate(const std::string& name) {
@@ -486,6 +486,17 @@ void processCommand(const std::string& input) {
         }
     } else if (cmd == "help") {
         showHelp();
+    } else if (cmd == "version") {
+        std::cout << "AC Command Processor v1.0 INDEV\n";
+        std::cout << "  Built on " + __DATE__ + " at " + __TIME__ + "\n";
+        std::cout << "  Author: Arthur Pruvost Rivière\n";
+        std::cout << "\n";
+        std::cout << "Squirel Packet Manager [not implemented] INDEV\n";
+        std::cout << "  Built on " + __DATE__ + " at " + __TIME__ + "\n";
+        std::cout << "  Author: Arthur Pruvost Rivière\n";
+        std::cout << "\n";
+        std::cout << "Packet Version :\n";
+        std::cout << "  No Packet Downloaded\n";
     } else if (cmd == "create") {
         if (args.size() > 1) {
             createCommand(args[1]);
