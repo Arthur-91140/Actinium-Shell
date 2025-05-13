@@ -5,7 +5,8 @@
 #include <codecvt>
 #include <cstdlib>
 #include <windows.h>
+#include <shlobj.h> // For SHGetFolderPath
 
 void banner();
 
-string GetUserFolderPath();
+std::string GetUserFolderPath();

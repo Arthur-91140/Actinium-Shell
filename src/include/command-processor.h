@@ -9,6 +9,9 @@
 #include <cstdlib>
 #include <windows.h>
 
+#define __DATE__
+#define __TIME__
+
 // Command module structure
 struct CommandModule {
     std::string name;
