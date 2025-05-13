@@ -634,18 +634,24 @@ void processCommand(const std::string& input) {
             std::cout << "Erreur: Veuillez spécifier une commande à recharger.\n";
         }
     } else {
-        // Vérifier si c'est une commande chargée
-        if (loadedCommands.find(cmd) != loadedCommands.end() && loadedCommands[cmd].execute != NULL) {
+        // *** MODIFICATION IMPORTANTE : D'abord vérifier dans le PATH ***
+        // Vérifier si c'est une commande dans le PATH
+        std::string execPath = findExecutableInPath(cmd);
+        if (!execPath.empty()) {
+            // C'est une commande externe, l'exécuter
+            executeExternalCommand(input);
+        }
+        // Sinon, vérifier si c'est une commande chargée
+        else if (loadedCommands.find(cmd) != loadedCommands.end() && loadedCommands[cmd].execute != NULL) {
             // Exécuter la commande
             loadedCommands[cmd].execute(args);
-        } else {
-            // Essayer de charger la commande
-            if (loadCommandModule(cmd)) {
-                loadedCommands[cmd].execute(args);
-            } else {
-                // Pas une commande intégrée ou chargeable, essayer comme commande externe
-                executeExternalCommand(input);
-            }
+        } 
+        // Enfin, essayer de la charger comme module
+        else if (loadCommandModule(cmd)) {
+            loadedCommands[cmd].execute(args);
+        } 
+        else {
+            std::cout << "Erreur: Commande '" << cmd << "' introuvable.\n";
         }
     }
 }
