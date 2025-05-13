@@ -375,7 +375,7 @@ bool changeDirectory(const std::string& path) {
 }
 
 void printCurrentDirectory() {
-    std::cout << "Current directory: " << currentDirectory << "\n";
+    std::cout << currentDirectory << "\n";
 }
 
 void executeExternalCommand(const std::string& command) {
@@ -465,12 +465,12 @@ void processCommand(const std::string& input) {
     
     if (cmd == "hello") {
         if (args.size() > 1) {
-            std::cout << "Hello, " << args[1] << "! 👋\n";
+            std::cout << "Hello, " << args[1] << "! \n";
         } else {
-            std::cout << "Hello, world! 🌍\n";
+            std::cout << "Hello, world! \n";
         }
     } else if (cmd == "exit") {
-        std::cout << "Closing terminal. 👋\n";
+        std::cout << "Closing terminal. \n";
         exit(0);
     } else if (cmd == "pwd") {
         printCurrentDirectory();
