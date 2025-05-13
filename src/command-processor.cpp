@@ -488,11 +488,11 @@ void processCommand(const std::string& input) {
         showHelp();
     } else if (cmd == "version") {
         std::cout << "AC Command Processor v1.0 INDEV\n";
-        std::cout << "  Built on " + __DATE__ + " at " + __TIME__ + "\n";
+        std::cout << "  Built on " << __DATE__ << " at " << __TIME__ << "\n";
         std::cout << "  Author: Arthur Pruvost Rivière\n";
         std::cout << "\n";
         std::cout << "Squirel Packet Manager [not implemented] INDEV\n";
-        std::cout << "  Built on " + __DATE__ + " at " + __TIME__ + "\n";
+        std::cout << "  Built on " << __DATE__ << " at " << __TIME__ << "\n";
         std::cout << "  Author: Arthur Pruvost Rivière\n";
         std::cout << "\n";
         std::cout << "Packet Version :\n";
