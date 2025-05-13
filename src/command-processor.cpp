@@ -378,7 +378,6 @@ void printCurrentDirectory() {
     std::cout << currentDirectory << "\n";
 }
 
-
 // Améliorations pour la fonction findExecutableInPath
 std::string findExecutableInPath(const std::string& command) {
     // Si la commande contient déjà un chemin complet
@@ -448,7 +447,7 @@ std::string findExecutableInPath(const std::string& command) {
     return ""; // Non trouvé dans le PATH
 }
 
-// Amélioration de la fonction executeExternalCommand
+// Fonction MODIFIÉE pour exécuter des commandes externes avec un meilleur support pour les applications interactives
 void executeExternalCommand(const std::string& command) {
     // Analyser la commande pour obtenir le nom de l'exécutable et les arguments
     std::istringstream iss(command);
@@ -462,28 +461,16 @@ void executeExternalCommand(const std::string& command) {
         std::cout << "Erreur: Commande '" << execName << "' introuvable.\n";
         return;
     }
-    
-    // Créer des pipes pour rediriger la sortie
-    SECURITY_ATTRIBUTES sa;
-    sa.nLength = sizeof(SECURITY_ATTRIBUTES);
-    sa.bInheritHandle = TRUE;
-    sa.lpSecurityDescriptor = NULL;
 
-    HANDLE hReadPipe, hWritePipe;
-    if (!CreatePipe(&hReadPipe, &hWritePipe, &sa, 0)) {
-        std::cout << "Erreur: Impossible de créer les pipes pour la redirection.\n";
-        return;
-    }
+    // Pour les applications interactives comme nano, il faut utiliser CreateProcess directement
+    // sans rediriger l'entrée/sortie standard
     
-    SetHandleInformation(hReadPipe, HANDLE_FLAG_INHERIT, 0);
-
     // Préparer les structures pour CreateProcess
     STARTUPINFOA si;
     ZeroMemory(&si, sizeof(STARTUPINFOA));
     si.cb = sizeof(STARTUPINFOA);
-    si.hStdError = hWritePipe;
-    si.hStdOutput = hWritePipe;
-    si.dwFlags |= STARTF_USESTDHANDLES;
+    // Ne pas rediriger les E/S standards pour permettre le mode interactif
+    si.dwFlags = 0;
 
     PROCESS_INFORMATION pi;
     ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));
@@ -511,24 +498,7 @@ void executeExternalCommand(const std::string& command) {
     if (!success) {
         DWORD error = GetLastError();
         std::cout << "Erreur: Impossible d'exécuter la commande. Code d'erreur: " << error << "\n";
-        CloseHandle(hWritePipe);
-        CloseHandle(hReadPipe);
         return;
-    }
-
-    // Fermer le handle d'écriture pour que ReadFile puisse se terminer
-    CloseHandle(hWritePipe);
-
-    // Lire la sortie du processus
-    const int BUFFER_SIZE = 4096;
-    char buffer[BUFFER_SIZE];
-    DWORD bytesRead;
-    std::string output;
-    
-    while (ReadFile(hReadPipe, buffer, BUFFER_SIZE - 1, &bytesRead, NULL) && bytesRead != 0) {
-        buffer[bytesRead] = '\0';  // Terminer la chaîne par un null
-        std::cout << buffer;
-        output += buffer;
     }
 
     // Attendre que le processus se termine
@@ -541,10 +511,9 @@ void executeExternalCommand(const std::string& command) {
     // Nettoyer
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
-    CloseHandle(hReadPipe);
 }
 
-// Amélioration de la fonction processCommand pour mieux gérer les commandes externes
+// Amélioration de la fonction processCommand
 void processCommand(const std::string& input) {
     std::istringstream iss(input);
     std::string cmd;
@@ -634,7 +603,6 @@ void processCommand(const std::string& input) {
             std::cout << "Erreur: Veuillez spécifier une commande à recharger.\n";
         }
     } else {
-        // *** MODIFICATION IMPORTANTE : D'abord vérifier dans le PATH ***
         // Vérifier si c'est une commande dans le PATH
         std::string execPath = findExecutableInPath(cmd);
         if (!execPath.empty()) {
