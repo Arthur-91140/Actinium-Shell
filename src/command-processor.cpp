@@ -14,7 +14,7 @@
 // Global variables
 std::string currentDirectory = ".";  // Current directory
 std::map<std::string, CommandModule> loadedCommands;
-std::string commandsDirectory = ".\\commands";
+std::string commandsDirectory = GetUserFolderPath + "\\commands";
 
 // Create a template for new commands
 void createCommandTemplate(const std::string& name) {
