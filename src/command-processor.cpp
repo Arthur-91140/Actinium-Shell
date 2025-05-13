@@ -378,47 +378,66 @@ void printCurrentDirectory() {
     std::cout << currentDirectory << "\n";
 }
 
-// Find executable in PATH
+
+// Améliorations pour la fonction findExecutableInPath
 std::string findExecutableInPath(const std::string& command) {
-    // First check if the command is a full path to an executable
+    // Si la commande contient déjà un chemin complet
     if (command.find('\\') != std::string::npos || command.find('/') != std::string::npos) {
-        return command;
+        DWORD fileAttrs = GetFileAttributesA(command.c_str());
+        if (fileAttrs != INVALID_FILE_ATTRIBUTES && !(fileAttrs & FILE_ATTRIBUTE_DIRECTORY)) {
+            return command;
+        }
     }
     
-    // Get the PATH environment variable
-    char pathBuffer[32767]; // Maximum size for environment variables
+    // Récupérer la variable d'environnement PATH
+    char pathBuffer[32767]; // Taille maximale pour les variables d'environnement
     DWORD pathSize = GetEnvironmentVariableA("PATH", pathBuffer, sizeof(pathBuffer));
     
     if (pathSize == 0 || pathSize >= sizeof(pathBuffer)) {
-        return ""; // Failed to get PATH or buffer too small
+        return ""; // Échec de la récupération du PATH ou tampon trop petit
     }
     
     std::string path(pathBuffer);
     std::istringstream pathStream(path);
     std::string pathDir;
     
-    // Common executable extensions on Windows
+    // Extensions communes des exécutables sous Windows
     std::vector<std::string> extensions = {".exe", ".com", ".bat", ".cmd"};
     
-    // Add empty extension for commands without extension
+    // Si la commande n'a pas d'extension, essayer avec les extensions communes
     if (command.find('.') == std::string::npos) {
-        extensions.push_back("");
-    }
-    
-    // Split PATH by semicolons and check each directory
-    while (std::getline(pathStream, pathDir, ';')) {
-        if (pathDir.empty()) continue;
-        
-        // Ensure path ends with backslash
-        if (pathDir.back() != '\\') {
-            pathDir += '\\';
-        }
-        
-        // Try with each extension
         for (const auto& ext : extensions) {
-            std::string fullPath = pathDir + command + ext;
+            std::istringstream pathStreamCopy(path);
+            while (std::getline(pathStreamCopy, pathDir, ';')) {
+                if (pathDir.empty()) continue;
+                
+                // S'assurer que le chemin se termine par un backslash
+                if (pathDir.back() != '\\') {
+                    pathDir += '\\';
+                }
+                
+                std::string fullPath = pathDir + command + ext;
+                
+                // Vérifier si le fichier existe et n'est pas un répertoire
+                DWORD fileAttrs = GetFileAttributesA(fullPath.c_str());
+                if (fileAttrs != INVALID_FILE_ATTRIBUTES && !(fileAttrs & FILE_ATTRIBUTE_DIRECTORY)) {
+                    return fullPath;
+                }
+            }
+        }
+    } else {
+        // La commande a déjà une extension, la chercher directement
+        while (std::getline(pathStream, pathDir, ';')) {
+            if (pathDir.empty()) continue;
             
-            // Check if file exists and is executable
+            // S'assurer que le chemin se termine par un backslash
+            if (pathDir.back() != '\\') {
+                pathDir += '\\';
+            }
+            
+            std::string fullPath = pathDir + command;
+            
+            // Vérifier si le fichier existe et n'est pas un répertoire
             DWORD fileAttrs = GetFileAttributesA(fullPath.c_str());
             if (fileAttrs != INVALID_FILE_ATTRIBUTES && !(fileAttrs & FILE_ATTRIBUTE_DIRECTORY)) {
                 return fullPath;
@@ -426,34 +445,39 @@ std::string findExecutableInPath(const std::string& command) {
         }
     }
     
-    return ""; // Not found in PATH
+    return ""; // Non trouvé dans le PATH
 }
 
+// Amélioration de la fonction executeExternalCommand
 void executeExternalCommand(const std::string& command) {
-    // Parse command to get executable name and arguments
+    // Analyser la commande pour obtenir le nom de l'exécutable et les arguments
     std::istringstream iss(command);
     std::string execName;
     iss >> execName;
     
-    // Find the executable in PATH
+    // Trouver l'exécutable dans le PATH
     std::string execPath = findExecutableInPath(execName);
     
     if (execPath.empty()) {
-        std::cout << "Error: Command '" << execName << "' not found.\n";
+        std::cout << "Erreur: Commande '" << execName << "' introuvable.\n";
         return;
     }
     
-    // Create pipes for redirecting output
+    // Créer des pipes pour rediriger la sortie
     SECURITY_ATTRIBUTES sa;
     sa.nLength = sizeof(SECURITY_ATTRIBUTES);
     sa.bInheritHandle = TRUE;
     sa.lpSecurityDescriptor = NULL;
 
     HANDLE hReadPipe, hWritePipe;
-    CreatePipe(&hReadPipe, &hWritePipe, &sa, 0);
+    if (!CreatePipe(&hReadPipe, &hWritePipe, &sa, 0)) {
+        std::cout << "Erreur: Impossible de créer les pipes pour la redirection.\n";
+        return;
+    }
+    
     SetHandleInformation(hReadPipe, HANDLE_FLAG_INHERIT, 0);
 
-    // Prepare structures for CreateProcess
+    // Préparer les structures pour CreateProcess
     STARTUPINFOA si;
     ZeroMemory(&si, sizeof(STARTUPINFOA));
     si.cb = sizeof(STARTUPINFOA);
@@ -464,69 +488,80 @@ void executeExternalCommand(const std::string& command) {
     PROCESS_INFORMATION pi;
     ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));
 
-    // Create a modifiable copy of the command
+    // Créer une copie modifiable de la commande
     char* commandLine = _strdup(command.c_str());
 
-    // Execute the command
+    // Exécuter la commande
     BOOL success = CreateProcessA(
-        NULL,               // No specific module
-        commandLine,        // Command line
-        NULL,               // Default process security
-        NULL,               // Default thread security
-        TRUE,               // Inherit handles
-        0,                  // No creation flags
-        NULL,               // Use parent's environment
-        NULL,               // Use current directory
-        &si,                // Startup info
-        &pi                 // Process info
+        NULL,               // Pas de module spécifique
+        commandLine,        // Ligne de commande
+        NULL,               // Sécurité de processus par défaut
+        NULL,               // Sécurité de thread par défaut
+        TRUE,               // Hériter les handles
+        0,                  // Pas de flags de création
+        NULL,               // Utiliser l'environnement du parent
+        NULL,               // Utiliser le répertoire courant
+        &si,                // Info de démarrage
+        &pi                 // Info de processus
     );
 
-    // Free allocated memory
+    // Libérer la mémoire allouée
     free(commandLine);
 
     if (!success) {
-        std::cout << "Error: Cannot execute command.\n";
+        DWORD error = GetLastError();
+        std::cout << "Erreur: Impossible d'exécuter la commande. Code d'erreur: " << error << "\n";
         CloseHandle(hWritePipe);
         CloseHandle(hReadPipe);
         return;
     }
 
-    // Close write handle so ReadFile can complete
+    // Fermer le handle d'écriture pour que ReadFile puisse se terminer
     CloseHandle(hWritePipe);
 
-    // Read process output
+    // Lire la sortie du processus
     const int BUFFER_SIZE = 4096;
     char buffer[BUFFER_SIZE];
     DWORD bytesRead;
+    std::string output;
     
     while (ReadFile(hReadPipe, buffer, BUFFER_SIZE - 1, &bytesRead, NULL) && bytesRead != 0) {
-        buffer[bytesRead] = '\0';  // Null-terminate the string
+        buffer[bytesRead] = '\0';  // Terminer la chaîne par un null
         std::cout << buffer;
+        output += buffer;
     }
 
-    // Wait for process to terminate
+    // Attendre que le processus se termine
     WaitForSingleObject(pi.hProcess, INFINITE);
 
-    // Clean up
+    // Récupérer le code de sortie
+    DWORD exitCode;
+    GetExitCodeProcess(pi.hProcess, &exitCode);
+
+    // Nettoyer
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
     CloseHandle(hReadPipe);
 }
 
+// Amélioration de la fonction processCommand pour mieux gérer les commandes externes
 void processCommand(const std::string& input) {
     std::istringstream iss(input);
     std::string cmd;
     iss >> cmd;
     
-    // Create a vector of arguments
+    if (cmd.empty()) return;
+    
+    // Créer un vecteur d'arguments
     std::vector<std::string> args;
-    args.push_back(cmd); // First argument is the command itself
+    args.push_back(cmd); // Le premier argument est la commande elle-même
     
     std::string arg;
     while (iss >> arg) {
         args.push_back(arg);
     }
     
+    // Vérifier les commandes intégrées
     if (cmd == "hello") {
         if (args.size() > 1) {
             std::cout << "Hello, " << args[1] << "! \n";
@@ -534,7 +569,7 @@ void processCommand(const std::string& input) {
             std::cout << "Hello, world! \n";
         }
     } else if (cmd == "exit") {
-        std::cout << "Closing terminal. \n";
+        std::cout << "Fermeture du terminal. \n";
         exit(0);
     } else if (cmd == "pwd") {
         printCurrentDirectory();
@@ -543,10 +578,22 @@ void processCommand(const std::string& input) {
             if (changeDirectory(args[1])) {
                 std::cout << currentDirectory << "\n";
             } else {
-                std::cout << "Error: Cannot change directory.\n";
+                std::cout << "Erreur: Impossible de changer de répertoire.\n";
             }
         } else {
-            std::cout << "Error: Please specify a path.\n";
+            // Par défaut, aller au répertoire utilisateur si aucun chemin n'est spécifié
+            std::string userHome = GetUserFolderPath();
+            if (!userHome.empty() && changeDirectory(userHome)) {
+                std::cout << currentDirectory << "\n";
+            } else {
+                std::cout << "Erreur: Impossible de changer de répertoire.\n";
+            }
+        }
+    } else if (cmd == "ls") {
+        if (args.size() > 1) {
+            listDirectory(args[1]);
+        } else {
+            listDirectory(currentDirectory);
         }
     } else if (cmd == "help") {
         showHelp();
@@ -565,38 +612,38 @@ void processCommand(const std::string& input) {
         if (args.size() > 1) {
             createCommand(args[1]);
         } else {
-            std::cout << "Error: Please specify a command name to create.\n";
+            std::cout << "Erreur: Veuillez spécifier un nom de commande à créer.\n";
         }
     } else if (cmd == "edit") {
         if (args.size() > 1) {
             editCommandSource(args[1]);
         } else {
-            std::cout << "Error: Please specify a command to edit.\n";
+            std::cout << "Erreur: Veuillez spécifier une commande à éditer.\n";
         }
     } else if (cmd == "compile") {
         if (args.size() > 1) {
             compileCommandModule(args[1]);
         } else {
-            std::cout << "Error: Please specify a command to compile.\n";
+            std::cout << "Erreur: Veuillez spécifier une commande à compiler.\n";
         }
     } else if (cmd == "reload") {
         if (args.size() > 1) {
             unloadCommandModule(args[1]);
             loadCommandModule(args[1]);
         } else {
-            std::cout << "Error: Please specify a command to reload.\n";
+            std::cout << "Erreur: Veuillez spécifier une commande à recharger.\n";
         }
     } else {
-        // Check if it's a loaded command
+        // Vérifier si c'est une commande chargée
         if (loadedCommands.find(cmd) != loadedCommands.end() && loadedCommands[cmd].execute != NULL) {
-            // Execute the command
+            // Exécuter la commande
             loadedCommands[cmd].execute(args);
         } else {
-            // Try to load the command
+            // Essayer de charger la commande
             if (loadCommandModule(cmd)) {
                 loadedCommands[cmd].execute(args);
             } else {
-                // Not a built-in or loadable command, try as an external command
+                // Pas une commande intégrée ou chargeable, essayer comme commande externe
                 executeExternalCommand(input);
             }
         }
