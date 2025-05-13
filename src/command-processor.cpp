@@ -474,16 +474,10 @@ void processCommand(const std::string& input) {
         exit(0);
     } else if (cmd == "pwd") {
         printCurrentDirectory();
-    } else if (cmd == "ls") {
-        if (args.size() > 1) {
-            listDirectory(args[1]);
-        } else {
-            listDirectory(currentDirectory);
-        }
     } else if (cmd == "cd") {
         if (args.size() > 1) {
             if (changeDirectory(args[1])) {
-                std::cout << "New directory: " << currentDirectory << "\n";
+                std::cout << currentDirectory << "\n";
             } else {
                 std::cout << "Error: Cannot change directory.\n";
             }
