@@ -5,6 +5,7 @@
 #include <codecvt>
 #include <cstdlib>
 #include <windows.h>
+#include <shlobj.h> // For SHGetFolderPath
 #include "./include/command-processor.h"
 #include "./include/init.h"
 
@@ -22,10 +23,10 @@ void banner() {
 }
 
 // Fonction pour obtenir le dossier utilisateur
-string GetUserFolderPath() {
+std::string GetUserFolderPath() {
     char path[MAX_PATH];
     if (SHGetFolderPath(NULL, CSIDL_PROFILE, NULL, 0, path) == S_OK) {
-        return string(path);
+        return std::string(path);
     }
     return "";
 }
