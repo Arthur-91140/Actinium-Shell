@@ -378,7 +378,71 @@ void printCurrentDirectory() {
     std::cout << currentDirectory << "\n";
 }
 
+// Find executable in PATH
+std::string findExecutableInPath(const std::string& command) {
+    // First check if the command is a full path to an executable
+    if (command.find('\\') != std::string::npos || command.find('/') != std::string::npos) {
+        return command;
+    }
+    
+    // Get the PATH environment variable
+    char pathBuffer[32767]; // Maximum size for environment variables
+    DWORD pathSize = GetEnvironmentVariableA("PATH", pathBuffer, sizeof(pathBuffer));
+    
+    if (pathSize == 0 || pathSize >= sizeof(pathBuffer)) {
+        return ""; // Failed to get PATH or buffer too small
+    }
+    
+    std::string path(pathBuffer);
+    std::istringstream pathStream(path);
+    std::string pathDir;
+    
+    // Common executable extensions on Windows
+    std::vector<std::string> extensions = {".exe", ".com", ".bat", ".cmd"};
+    
+    // Add empty extension for commands without extension
+    if (command.find('.') == std::string::npos) {
+        extensions.push_back("");
+    }
+    
+    // Split PATH by semicolons and check each directory
+    while (std::getline(pathStream, pathDir, ';')) {
+        if (pathDir.empty()) continue;
+        
+        // Ensure path ends with backslash
+        if (pathDir.back() != '\\') {
+            pathDir += '\\';
+        }
+        
+        // Try with each extension
+        for (const auto& ext : extensions) {
+            std::string fullPath = pathDir + command + ext;
+            
+            // Check if file exists and is executable
+            DWORD fileAttrs = GetFileAttributesA(fullPath.c_str());
+            if (fileAttrs != INVALID_FILE_ATTRIBUTES && !(fileAttrs & FILE_ATTRIBUTE_DIRECTORY)) {
+                return fullPath;
+            }
+        }
+    }
+    
+    return ""; // Not found in PATH
+}
+
 void executeExternalCommand(const std::string& command) {
+    // Parse command to get executable name and arguments
+    std::istringstream iss(command);
+    std::string execName;
+    iss >> execName;
+    
+    // Find the executable in PATH
+    std::string execPath = findExecutableInPath(execName);
+    
+    if (execPath.empty()) {
+        std::cout << "Error: Command '" << execName << "' not found.\n";
+        return;
+    }
+    
     // Create pipes for redirecting output
     SECURITY_ATTRIBUTES sa;
     sa.nLength = sizeof(SECURITY_ATTRIBUTES);
