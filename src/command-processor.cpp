@@ -287,9 +287,10 @@ void showHelp() {
     std::cout << "  hello [name]    - Display a welcome message\n";
     std::cout << "  exit            - Quit the shell\n";
     std::cout << "  pwd             - Show current directory\n";
-    std::cout << "  ls [path]       - List directory contents\n";
     std::cout << "  cd [path]       - Change current directory\n";
     std::cout << "  help            - Display this help\n";
+    std::cout << "  version         - Show version information\n";
+    std::cout << "  SPM-Install     - Install the Squirel Packet Manager\n";
     
     // Command management
     std::cout << "\nCommand Management:\n";
@@ -557,12 +558,6 @@ void processCommand(const std::string& input) {
             } else {
                 std::cout << "Erreur: Impossible de changer de répertoire.\n";
             }
-        }
-    } else if (cmd == "ls") {
-        if (args.size() > 1) {
-            listDirectory(args[1]);
-        } else {
-            listDirectory(currentDirectory);
         }
     } else if (cmd == "help") {
         showHelp();
