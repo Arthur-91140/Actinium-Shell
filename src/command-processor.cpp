@@ -102,7 +102,6 @@ void initializeCommandSystem() {
     CreateDirectoryA(commandsDirectory.c_str(), NULL);
     
     // Try to load built-in commands
-    loadCommandModule("ls");
     loadCommandModule("cd");
     loadCommandModule("pwd");
 }
@@ -260,8 +259,8 @@ bool editCommandSource(const std::string& name) {
         }
     }
     
-    // Open the source file in the default editor (notepad for simplicity)
-    std::string editorCmd = "notepad.exe \"" + loadedCommands[name].sourcePath + "\"";
+    // Open the source file in the default editor (nano for simplicity)
+    std::string editorCmd = "nano.exe \"" + loadedCommands[name].sourcePath + "\"";
     system(editorCmd.c_str());
     
     // Ask if user wants to compile
@@ -308,6 +307,10 @@ void showHelp() {
             }
         }
     }
+
+    // Alias
+    std::cout << "\nAliases:\n";
+
     
     std::cout << "\nTip: You can modify any command by using 'edit [command]'.\n";
 }
