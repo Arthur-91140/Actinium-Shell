@@ -4,6 +4,7 @@
 #include <fstream>
 #include <algorithm>
 #include <sstream>
+#include <set>
 
 HistoryManager::HistoryManager() {
     historyFilePath = getHistoryFilePath();
