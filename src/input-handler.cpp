@@ -196,14 +196,6 @@ std::string InputHandler::readInput() {
             state.showingSuggestions = false;
             state.suggestions.clear();
             state.suggestionIndex = -1;
-        } else if (ch == '\r' || ch == '\n') { // Enter with suggestion
-            if (state.showingSuggestions && state.suggestionIndex >= 0 && state.suggestionIndex < (int)state.suggestions.size()) {
-                state.currentInput = state.suggestions[state.suggestionIndex];
-                state.cursorPosition = state.currentInput.length();
-                state.showingSuggestions = false;
-                state.suggestions.clear();
-                break;
-            }
         } else if (ch >= 32 && ch <= 126) { // Printable characters
             state.currentInput.insert(state.cursorPosition, 1, (char)ch);
             state.cursorPosition++;
@@ -238,6 +230,11 @@ std::string InputHandler::readInput() {
         int promptLength = currentDirectory.length() + 5; // "AC " + "> " = 5 chars
         COORD inputCursor = {(SHORT)(promptLength + state.cursorPosition), info.dwCursorPosition.Y};
         SetConsoleCursorPosition(hConsole, inputCursor);
+    }
+    
+    // ENTER was pressed - check if we should use a suggestion
+    if (state.showingSuggestions && state.suggestionIndex >= 0 && state.suggestionIndex < (int)state.suggestions.size()) {
+        state.currentInput = state.suggestions[state.suggestionIndex];
     }
     
     // Clear suggestions area
