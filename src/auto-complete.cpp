@@ -140,18 +140,43 @@ std::vector<std::string> AutoComplete::getFileCompletions(const std::string& par
     std::string searchDir = ".";
     std::string prefix = partialPath;
     
+    // Parse the path to separate directory and filename
     size_t lastSlash = partialPath.find_last_of("\\/");
     if (lastSlash != std::string::npos) {
         searchDir = partialPath.substr(0, lastSlash);
+        if (searchDir.empty()) searchDir = "\\"; // Root directory
         prefix = partialPath.substr(lastSlash + 1);
+    }
+    
+    // Handle special cases
+    if (partialPath.empty()) {
+        searchDir = ".";
+        prefix = "";
     }
     
     std::vector<std::string> contents = getDirectoryContents(searchDir);
     
     for (const auto& item : contents) {
-        if (prefix.empty() || item.find(prefix) == 0) {
-            std::string fullPath = (searchDir == ".") ? item : searchDir + "\\" + item;
-            completions.push_back(fullPath);
+        if (prefix.empty() || item.length() >= prefix.length() && 
+            item.substr(0, prefix.length()) == prefix) {
+            
+            std::string completion;
+            if (searchDir == ".") {
+                completion = item;
+            } else if (searchDir == "\\") {
+                completion = "\\" + item;
+            } else {
+                completion = searchDir + "\\" + item;
+            }
+            
+            // Check if it's a directory and add trailing slash
+            std::string fullItemPath = (searchDir == ".") ? item : searchDir + "\\" + item;
+            DWORD attrs = GetFileAttributesA(fullItemPath.c_str());
+            if (attrs != INVALID_FILE_ATTRIBUTES && (attrs & FILE_ATTRIBUTE_DIRECTORY)) {
+                completion += "\\";
+            }
+            
+            completions.push_back(completion);
         }
     }
     

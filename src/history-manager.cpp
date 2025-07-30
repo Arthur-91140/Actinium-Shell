@@ -76,6 +76,9 @@ void HistoryManager::addCommand(const std::string& command) {
     if (commandHistory.size() > Config::MAX_HISTORY_SIZE) {
         commandHistory.erase(commandHistory.begin());
     }
+    
+    // Save immediately to ensure we don't lose history
+    saveHistory();
 }
 
 std::vector<std::string> HistoryManager::searchHistory(const std::string& query) {

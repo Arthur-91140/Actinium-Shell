@@ -20,6 +20,24 @@ HistoryManager* g_historyManager = nullptr;
 AutoComplete* g_autoComplete = nullptr;
 InputHandler* g_inputHandler = nullptr;
 
+// Function to cleanup and exit
+void cleanupAndExit() {
+    std::cout << "Fermeture du terminal. \n";
+    
+    // Force save history before exit
+    if (g_historyManager) {
+        delete g_historyManager; // This will call the destructor and save history
+    }
+    if (g_autoComplete) {
+        delete g_autoComplete;
+    }
+    if (g_inputHandler) {
+        delete g_inputHandler;
+    }
+    
+    exit(0);
+}
+
 int main() {
     SetConsoleOutputCP(65001); // Set UTF-8 code page for Windows console
 
@@ -41,19 +59,20 @@ int main() {
     banner();   // Display the banner
     
     std::cout << "Enhanced AC Shell - Type 'help' for available commands\n";
+    std::cout << "Features: Fuzzy search, auto-completion (Tab), command history (Up/Down)\n";
+    std::cout << "History file: " << getHistoryFilePath() << "\n\n";
 
     while (true) {
         input = g_inputHandler->readInput();
 
         if (!input.empty()) {
+            // Check for exit command here to ensure proper cleanup
+            if (input == "exit") {
+                cleanupAndExit();
+            }
             processCommand(input);
         }
     }
-
-    // Clean up (though we never reach here in normal execution)
-    delete g_historyManager;
-    delete g_autoComplete;
-    delete g_inputHandler;
 
     return 0;
 }

@@ -76,12 +76,12 @@ void InputHandler::printSuggestions() {
     
     int count = 0;
     for (size_t i = 0; i < state.suggestions.size() && count < Config::MAX_SUGGESTIONS; ++i) {
-        if (i == state.suggestionIndex) {
+        if ((int)i == state.suggestionIndex) {
             // Highlight selected suggestion
             SetConsoleTextAttribute(hConsole, BACKGROUND_BLUE | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
         }
         std::cout << "  " << state.suggestions[i];
-        if (i == state.suggestionIndex) {
+        if ((int)i == state.suggestionIndex) {
             resetTextColor();
             setTextColor(Config::COLOR_SUGGESTION);
         }
@@ -129,15 +129,24 @@ std::string InputHandler::readInput() {
                     if (state.showingSuggestions && state.suggestionIndex > 0) {
                         state.suggestionIndex--;
                     } else if (!state.showingSuggestions) {
-                        // Show recent commands
-                        state.suggestions = g_historyManager->getRecentCommands();
-                        state.showingSuggestions = true;
-                        state.suggestionIndex = 0;
+                        // Show recent commands from history
+                        state.suggestions = g_historyManager->getRecentCommands(10);
+                        if (!state.suggestions.empty()) {
+                            state.showingSuggestions = true;
+                            state.suggestionIndex = 0;
+                        }
                     }
                     break;
                 case 80: // Down arrow
                     if (state.showingSuggestions && state.suggestionIndex < (int)state.suggestions.size() - 1) {
                         state.suggestionIndex++;
+                    } else if (!state.showingSuggestions) {
+                        // Show recent commands from history
+                        state.suggestions = g_historyManager->getRecentCommands(10);
+                        if (!state.suggestions.empty()) {
+                            state.showingSuggestions = true;
+                            state.suggestionIndex = 0;
+                        }
                     }
                     break;
                 case 75: // Left arrow
@@ -152,9 +161,17 @@ std::string InputHandler::readInput() {
                     break;
             }
         } else if (ch == '\t') { // Tab key
-            if (!state.currentInput.empty()) {
-                std::vector<std::string> completions = g_autoComplete->getCompletions(state.currentInput);
-                if (!completions.empty()) {
+            // Tab completion for files and directories
+            std::vector<std::string> completions = g_autoComplete->getFileCompletions(state.currentInput);
+            if (!completions.empty()) {
+                if (completions.size() == 1) {
+                    // Auto-complete with the single match
+                    state.currentInput = completions[0];
+                    state.cursorPosition = state.currentInput.length();
+                    state.showingSuggestions = false;
+                    state.suggestions.clear();
+                } else {
+                    // Show multiple completions
                     state.suggestions = completions;
                     state.showingSuggestions = true;
                     state.suggestionIndex = 0;
@@ -165,15 +182,9 @@ std::string InputHandler::readInput() {
                 state.currentInput.erase(state.cursorPosition - 1, 1);
                 state.cursorPosition--;
                 
-                // Update suggestions with fuzzy search
+                // Update suggestions with fuzzy search from history only
                 if (!state.currentInput.empty()) {
-                    std::vector<std::string> historySuggestions = g_historyManager->fuzzySearch(state.currentInput);
-                    std::vector<std::string> commandSuggestions = g_autoComplete->getCommandSuggestions(state.currentInput);
-                    
-                    state.suggestions.clear();
-                    state.suggestions.insert(state.suggestions.end(), historySuggestions.begin(), historySuggestions.end());
-                    state.suggestions.insert(state.suggestions.end(), commandSuggestions.begin(), commandSuggestions.end());
-                    
+                    state.suggestions = g_historyManager->fuzzySearch(state.currentInput);
                     state.showingSuggestions = !state.suggestions.empty();
                     state.suggestionIndex = 0;
                 } else {
@@ -197,14 +208,8 @@ std::string InputHandler::readInput() {
             state.currentInput.insert(state.cursorPosition, 1, (char)ch);
             state.cursorPosition++;
             
-            // Update suggestions with fuzzy search
-            std::vector<std::string> historySuggestions = g_historyManager->fuzzySearch(state.currentInput);
-            std::vector<std::string> commandSuggestions = g_autoComplete->getCommandSuggestions(state.currentInput);
-            
-            state.suggestions.clear();
-            state.suggestions.insert(state.suggestions.end(), historySuggestions.begin(), historySuggestions.end());
-            state.suggestions.insert(state.suggestions.end(), commandSuggestions.begin(), commandSuggestions.end());
-            
+            // Update suggestions with fuzzy search from history only
+            state.suggestions = g_historyManager->fuzzySearch(state.currentInput);
             state.showingSuggestions = !state.suggestions.empty();
             state.suggestionIndex = 0;
         }
