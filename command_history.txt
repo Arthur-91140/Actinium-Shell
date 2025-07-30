@@ -1,0 +1,20 @@
+ls|10
+ls -lahv|5
+l|2
+clear|3
+ls|10
+l|2
+ls|10
+ls -lahv|5
+ls|10
+ac-shell.exe|1
+ls|10
+clear|3
+ls -lahv|5
+clear|3
+ls|10
+cd|1
+pwd|1
+.\ac-shell.exe|1
+exit|1
+ls|10
