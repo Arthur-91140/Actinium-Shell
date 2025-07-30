@@ -95,7 +95,7 @@ void InputHandler::printSuggestions() {
     resetTextColor();
     
     // Return to input line
-    SetConsoleCursorPosition(hConsole, currentPos);
+    SetConsoleCursorPosition(hConsole, currentPos.dwCursorPosition);
 }
 
 void InputHandler::moveCursor(int x, int y) {
