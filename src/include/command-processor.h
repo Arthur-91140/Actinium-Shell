@@ -1,4 +1,4 @@
-// command-processor.h
+// src/include/command-processor.h (Updated)
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -8,6 +8,7 @@
 #include <codecvt>
 #include <cstdlib>
 #include <windows.h>
+#include <set>
 
 // Command module structure
 struct CommandModule {
@@ -19,10 +20,20 @@ struct CommandModule {
     void (*execute)(const std::vector<std::string>&);
 };
 
+// Forward declarations
+class HistoryManager;
+class AutoComplete;
+class InputHandler;
+
 // Global variables
 extern std::string currentDirectory;
 extern std::map<std::string, CommandModule> loadedCommands;
 extern std::string commandsDirectory;
+
+// Global instances (defined in main.cpp)
+extern HistoryManager* g_historyManager;
+extern AutoComplete* g_autoComplete;
+extern InputHandler* g_inputHandler;
 
 // Command processing functions
 void processCommand(const std::string& input);
