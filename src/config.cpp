@@ -9,11 +9,11 @@ namespace Config {
     const int MAX_SUGGESTIONS = 5;
     const int FUZZY_MATCH_THRESHOLD = 50;
     
-    // Colors (Windows console color attributes)
+    // Colors matching the image exactly
     const int COLOR_NORMAL = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE; // White
-    const int COLOR_INPUT = FOREGROUND_RED | FOREGROUND_GREEN; // Yellow
-    const int COLOR_SUGGESTION = FOREGROUND_BLUE | FOREGROUND_GREEN; // Cyan (light blue-green)
-    const int COLOR_PROMPT = FOREGROUND_GREEN | FOREGROUND_INTENSITY; // Bright Green
+    const int COLOR_INPUT = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY; // Yellow (text being typed)
+    const int COLOR_SUGGESTION = FOREGROUND_INTENSITY; // Dark Gray (suggestion completion)
+    const int COLOR_PROMPT = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE; // WHITE (prompt)
 }
 
 std::string getExecutableDirectory() {

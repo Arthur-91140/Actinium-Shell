@@ -64,38 +64,17 @@ void InputHandler::printSuggestions() {
         return;
     }
     
-    // Save current cursor position
-    CONSOLE_SCREEN_BUFFER_INFO currentPos;
-    GetConsoleScreenBufferInfo(hConsole, &currentPos);
-    
-    // Move to next line
-    COORD newPos = {0, currentPos.dwCursorPosition.Y + 1};
-    SetConsoleCursorPosition(hConsole, newPos);
-    
-    setTextColor(Config::COLOR_SUGGESTION);
-    
-    int count = 0;
-    for (size_t i = 0; i < state.suggestions.size() && count < Config::MAX_SUGGESTIONS; ++i) {
-        if ((int)i == state.suggestionIndex) {
-            // Highlight selected suggestion
-            SetConsoleTextAttribute(hConsole, BACKGROUND_BLUE | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
-        }
-        std::cout << "  " << state.suggestions[i];
-        if ((int)i == state.suggestionIndex) {
-            resetTextColor();
-            setTextColor(Config::COLOR_SUGGESTION);
-        }
+    // Find the part of the suggestion that completes the current input
+    const std::string& suggestion = state.suggestions[0];
+    if (suggestion.length() > state.currentInput.length() && 
+        suggestion.substr(0, state.currentInput.length()) == state.currentInput) {
         
-        if (i < state.suggestions.size() - 1 && count < Config::MAX_SUGGESTIONS - 1) {
-            std::cout << "\n";
-            count++;
-        }
+        // Show only the completing part in gray
+        std::string completion = suggestion.substr(state.currentInput.length());
+        setTextColor(Config::COLOR_SUGGESTION);
+        std::cout << completion;
+        resetTextColor();
     }
-    
-    resetTextColor();
-    
-    // Return to input line
-    SetConsoleCursorPosition(hConsole, currentPos.dwCursorPosition);
 }
 
 void InputHandler::moveCursor(int x, int y) {
@@ -121,32 +100,30 @@ std::string InputHandler::readInput() {
     printPrompt();
     
     int ch;
-    while ((ch = _getch()) != '\r') { // Enter key
-        if (ch == 0 || ch == 224) { // Extended key
+    bool shouldExit = false;
+    
+    while (!shouldExit) {
+        ch = _getch();
+        
+        if (ch == '\r') { // Enter key
+            shouldExit = true;
+        } else if (ch == 0 || ch == 224) { // Extended key
             ch = _getch();
             switch (ch) {
                 case 72: // Up arrow
-                    if (state.showingSuggestions && state.suggestionIndex > 0) {
-                        state.suggestionIndex--;
-                    } else if (!state.showingSuggestions) {
-                        // Show recent commands from history
-                        state.suggestions = g_historyManager->getRecentCommands(10);
-                        if (!state.suggestions.empty()) {
-                            state.showingSuggestions = true;
-                            state.suggestionIndex = 0;
-                        }
+                    // Show recent commands from history
+                    state.suggestions = g_historyManager->getRecentCommands(10);
+                    if (!state.suggestions.empty()) {
+                        state.showingSuggestions = true;
+                        state.suggestionIndex = 0;
                     }
                     break;
                 case 80: // Down arrow
-                    if (state.showingSuggestions && state.suggestionIndex < (int)state.suggestions.size() - 1) {
-                        state.suggestionIndex++;
-                    } else if (!state.showingSuggestions) {
-                        // Show recent commands from history
-                        state.suggestions = g_historyManager->getRecentCommands(10);
-                        if (!state.suggestions.empty()) {
-                            state.showingSuggestions = true;
-                            state.suggestionIndex = 0;
-                        }
+                    // Show recent commands from history
+                    state.suggestions = g_historyManager->getRecentCommands(10);
+                    if (!state.suggestions.empty()) {
+                        state.showingSuggestions = true;
+                        state.suggestionIndex = 0;
                     }
                     break;
                 case 75: // Left arrow
@@ -154,8 +131,14 @@ std::string InputHandler::readInput() {
                         state.cursorPosition--;
                     }
                     break;
-                case 77: // Right arrow
-                    if (state.cursorPosition < (int)state.currentInput.length()) {
+                case 77: // Right arrow - Accept suggestion
+                    if (state.showingSuggestions && !state.suggestions.empty()) {
+                        // Accept the suggestion (most probable one)
+                        state.currentInput = state.suggestions[0];
+                        state.cursorPosition = state.currentInput.length();
+                        state.showingSuggestions = false;
+                        state.suggestions.clear();
+                    } else if (state.cursorPosition < (int)state.currentInput.length()) {
                         state.cursorPosition++;
                     }
                     break;
@@ -171,7 +154,7 @@ std::string InputHandler::readInput() {
                     state.showingSuggestions = false;
                     state.suggestions.clear();
                 } else {
-                    // Show multiple completions
+                    // Show the most probable completion
                     state.suggestions = completions;
                     state.showingSuggestions = true;
                     state.suggestionIndex = 0;
@@ -206,44 +189,27 @@ std::string InputHandler::readInput() {
             state.suggestionIndex = 0;
         }
         
-        // Clear screen area and redraw
-        CONSOLE_SCREEN_BUFFER_INFO info;
-        GetConsoleScreenBufferInfo(hConsole, &info);
-        
-        // Clear multiple lines if needed
-        for (int i = 0; i < 10; ++i) {
-            COORD coord = {0, info.dwCursorPosition.Y + i};
+        if (!shouldExit) {
+            // Clear current line only
+            CONSOLE_SCREEN_BUFFER_INFO info;
+            GetConsoleScreenBufferInfo(hConsole, &info);
+            
+            // Clear the current line
+            COORD coord = {0, info.dwCursorPosition.Y};
             DWORD written;
             FillConsoleOutputCharacterA(hConsole, ' ', info.dwSize.X, coord, &written);
+            SetConsoleCursorPosition(hConsole, coord);
+            
+            // Redraw everything on the same line
+            printPrompt();
+            printInput();
+            printSuggestions();
+            
+            // Position cursor correctly in input
+            int promptLength = currentDirectory.length() + 5; // "AC " + "> " = 5 chars
+            COORD inputCursor = {(SHORT)(promptLength + state.cursorPosition), info.dwCursorPosition.Y};
+            SetConsoleCursorPosition(hConsole, inputCursor);
         }
-        
-        // Reset cursor to beginning of line
-        COORD coord = {0, info.dwCursorPosition.Y};
-        SetConsoleCursorPosition(hConsole, coord);
-        
-        // Redraw everything
-        printPrompt();
-        printInput();
-        printSuggestions();
-        
-        // Position cursor correctly in input
-        int promptLength = currentDirectory.length() + 5; // "AC " + "> " = 5 chars
-        COORD inputCursor = {(SHORT)(promptLength + state.cursorPosition), info.dwCursorPosition.Y};
-        SetConsoleCursorPosition(hConsole, inputCursor);
-    }
-    
-    // ENTER was pressed - check if we should use a suggestion
-    if (state.showingSuggestions && state.suggestionIndex >= 0 && state.suggestionIndex < (int)state.suggestions.size()) {
-        state.currentInput = state.suggestions[state.suggestionIndex];
-    }
-    
-    // Clear suggestions area
-    CONSOLE_SCREEN_BUFFER_INFO info;
-    GetConsoleScreenBufferInfo(hConsole, &info);
-    for (int i = 1; i <= Config::MAX_SUGGESTIONS; ++i) {
-        COORD coord = {0, info.dwCursorPosition.Y + i};
-        DWORD written;
-        FillConsoleOutputCharacterA(hConsole, ' ', info.dwSize.X, coord, &written);
     }
     
     std::cout << std::endl;
