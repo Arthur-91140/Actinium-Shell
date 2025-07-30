@@ -139,38 +139,67 @@ std::vector<std::string> AutoComplete::getFileCompletions(const std::string& par
     
     std::string searchDir = ".";
     std::string prefix = partialPath;
+    std::string pathPrefix = ""; // Pour conserver .\ ou ./ ou \ ou / ou espace
     
-    // Parse the path to separate directory and filename
-    size_t lastSlash = partialPath.find_last_of("\\/");
-    if (lastSlash != std::string::npos) {
-        searchDir = partialPath.substr(0, lastSlash);
-        if (searchDir.empty()) searchDir = "\\"; // Root directory
-        prefix = partialPath.substr(lastSlash + 1);
+    // Gérer les préfixes spéciaux (y compris l'espace qui remet au répertoire courant)
+    if (partialPath.length() >= 2 && partialPath.substr(0, 2) == ".\\") {
+        pathPrefix = ".\\";
+        prefix = partialPath.substr(2);
+        searchDir = ".";
+    } else if (partialPath.length() >= 2 && partialPath.substr(0, 2) == "./") {
+        pathPrefix = "./";
+        prefix = partialPath.substr(2);
+        searchDir = ".";
+    } else if (partialPath.length() >= 1 && partialPath[0] == '\\') {
+        pathPrefix = "\\";
+        prefix = partialPath.substr(1);
+        searchDir = "\\";
+    } else if (partialPath.length() >= 1 && partialPath[0] == '/') {
+        pathPrefix = "/";
+        prefix = partialPath.substr(1);
+        searchDir = "\\"; // Convertir en Windows path
+    } else {
+        // Parse normal path pour séparer répertoire et nom de fichier
+        size_t lastSlash = partialPath.find_last_of("\\/");
+        if (lastSlash != std::string::npos) {
+            searchDir = partialPath.substr(0, lastSlash);
+            if (searchDir.empty()) searchDir = "\\"; // Root directory
+            prefix = partialPath.substr(lastSlash + 1);
+            pathPrefix = partialPath.substr(0, lastSlash + 1);
+        } else {
+            // Pas de slash trouvé, on cherche dans le répertoire courant
+            // Le partialPath est juste le début du nom de fichier
+            searchDir = ".";
+            prefix = partialPath;
+            pathPrefix = "";
+        }
     }
     
     // Handle special cases
     if (partialPath.empty()) {
         searchDir = ".";
         prefix = "";
+        pathPrefix = "";
     }
     
     std::vector<std::string> contents = getDirectoryContents(searchDir);
     
     for (const auto& item : contents) {
-        if (prefix.empty() || item.length() >= prefix.length() && 
-            item.substr(0, prefix.length()) == prefix) {
+        if (prefix.empty() || (item.length() >= prefix.length() && 
+            item.substr(0, prefix.length()) == prefix)) {
             
-            std::string completion;
-            if (searchDir == ".") {
-                completion = item;
-            } else if (searchDir == "\\") {
-                completion = "\\" + item;
-            } else {
-                completion = searchDir + "\\" + item;
-            }
+            std::string completion = pathPrefix + item;
             
             // Check if it's a directory and add trailing slash
-            std::string fullItemPath = (searchDir == ".") ? item : searchDir + "\\" + item;
+            std::string fullItemPath;
+            if (searchDir == ".") {
+                fullItemPath = item;
+            } else if (searchDir == "\\") {
+                fullItemPath = "\\" + item;
+            } else {
+                fullItemPath = searchDir + "\\" + item;
+            }
+            
             DWORD attrs = GetFileAttributesA(fullItemPath.c_str());
             if (attrs != INVALID_FILE_ATTRIBUTES && (attrs & FILE_ATTRIBUTE_DIRECTORY)) {
                 completion += "\\";

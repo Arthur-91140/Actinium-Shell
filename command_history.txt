@@ -1,5 +1,12 @@
 .\ac-shell.exe|1
-clear|1
+asset-Actinium\commands\|1
+clear|2
 exit|1
-ls|7
+ls|12
+ls -la|1
+ls -lha|1
 ls -lhv|2
+ls asset-Actinium\|1
+ollama help|1
+ollama list|1
+os|1

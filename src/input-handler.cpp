@@ -144,20 +144,60 @@ std::string InputHandler::readInput() {
                     break;
             }
         } else if (ch == '\t') { // Tab key
-            // Tab completion for files and directories
-            std::vector<std::string> completions = g_autoComplete->getFileCompletions(state.currentInput);
+            // Trouver le début du dernier argument (après le dernier espace)
+            size_t lastSpacePos = state.currentInput.find_last_of(' ');
+            std::string beforeLastArg = "";
+            std::string lastArg = state.currentInput;
+            
+            if (lastSpacePos != std::string::npos) {
+                beforeLastArg = state.currentInput.substr(0, lastSpacePos + 1); // Inclut l'espace
+                lastArg = state.currentInput.substr(lastSpacePos + 1);
+            } else {
+                // Pas d'espace trouvé, on complète tout l'input
+                beforeLastArg = "";
+                lastArg = state.currentInput;
+            }
+            
+            // Tab completion pour le dernier argument seulement
+            std::vector<std::string> completions = g_autoComplete->getFileCompletions(lastArg);
             if (!completions.empty()) {
                 if (completions.size() == 1) {
-                    // Auto-complete with the single match
-                    state.currentInput = completions[0];
+                    // Auto-complétion avec le seul match
+                    const std::string& completion = completions[0];
+                    
+                    // Reconstruct the full input: beforeLastArg + completion
+                    state.currentInput = beforeLastArg + completion;
                     state.cursorPosition = state.currentInput.length();
                     state.showingSuggestions = false;
                     state.suggestions.clear();
                 } else {
-                    // Show the most probable completion
+                    // Afficher les complétions possibles
                     state.suggestions = completions;
                     state.showingSuggestions = true;
                     state.suggestionIndex = 0;
+                    
+                    // Trouver le préfixe commun parmi les complétions
+                    std::string commonPrefix = "";
+                    if (!completions.empty()) {
+                        commonPrefix = completions[0];
+                        
+                        // Trouver le préfixe commun le plus long
+                        for (size_t i = 1; i < completions.size(); ++i) {
+                            const std::string& comp = completions[i];
+                            size_t j = 0;
+                            while (j < commonPrefix.length() && j < comp.length() && 
+                                   commonPrefix[j] == comp[j]) {
+                                j++;
+                            }
+                            commonPrefix = commonPrefix.substr(0, j);
+                        }
+                        
+                        // Si le préfixe commun est plus long que lastArg, l'utiliser
+                        if (commonPrefix.length() > lastArg.length()) {
+                            state.currentInput = beforeLastArg + commonPrefix;
+                            state.cursorPosition = state.currentInput.length();
+                        }
+                    }
                 }
             }
         } else if (ch == '\b') { // Backspace
