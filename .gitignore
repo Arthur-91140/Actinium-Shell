@@ -33,4 +33,6 @@
 
 # Folder
 .vscode/
-commands/
+
+# Ignore compiled command modules but keep source files
+commands/**/*.dll
