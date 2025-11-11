@@ -1,4 +1,4 @@
-# 🧪 ACTINIUM - A Modular and Customizable C++ Shell
+# ACTINIUM - A Modular and Customizable C++ Shell
 
 <div align="center">
 
@@ -13,7 +13,7 @@
 
 ---
 
-## 🌟 Overview
+## Overview
 
 **ACTINIUM** is not just another shell — it's a **modular, dynamic, and hackable** command-line environment built in C++. Unlike traditional shells where commands are static binaries, ACTINIUM gives you **direct access to the source code of each command from within the terminal**, allowing you to modify, recompile, and reload them **without ever leaving the shell**.
 
@@ -23,41 +23,41 @@ Inspired by **Terry A. Davis** and his work on operating systems, particularly t
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-### 🚀 Core Functionality
-- ✅ **Basic Command Line Interface** with full UTF-8 support
-- ✅ **File System Navigation** - `ls`, `cd`, `pwd` commands
-- ✅ **External Command Execution** via PATH environment variables
-- ✅ **Dynamic Module System** - Load/unload commands as DLL modules on-the-fly
-- ✅ **Colored Output** - Beautiful, customizable terminal colors
+### Core Functionality
+- **Basic Command Line Interface** with full UTF-8 support
+- **File System Navigation** - `ls`, `cd`, `pwd` commands
+- **External Command Execution** via PATH environment variables
+- **Dynamic Module System** - Load/unload commands as DLL modules on-the-fly
+- **Colored Output** - Beautiful, customizable terminal colors
 
-### 🧠 Intelligent Features
-- ✅ **Advanced Auto-Completion**
+### Intelligent Features
+- **Advanced Auto-Completion**
   - Tab completion for files, directories, and commands
   - Fuzzy matching with Levenshtein distance algorithm
   - Real-time suggestions while typing
   - Context-aware completions
 
-- ✅ **Smart Command History**
+- **Smart Command History**
   - Persistent history (1000+ commands)
   - Frequency-based ranking
   - Fuzzy search through history
   - Duplicate prevention
 
-### 🔧 Developer-Friendly
-- ✅ **On-the-Fly Command Modification**
+### Developer-Friendly
+- **On-the-Fly Command Modification**
   - Edit command source code from within the shell
   - Compile and reload instantly
   - No shell restart required
-- ✅ **Module Creation System**
+- **Module Creation System**
   - Generate command templates with `create [name]`
   - Built-in compilation with `compile [name]`
   - Hot-reload with `reload [name]`
 
 ---
 
-## 📦 Requirements
+## Requirements
 
 - **C++ Compiler**: g++ supporting C++11 or higher
 - **Operating System**: Windows (Linux/macOS support coming soon)
@@ -66,7 +66,7 @@ Inspired by **Terry A. Davis** and his work on operating systems, particularly t
 
 ---
 
-## 🛠️ Installation
+## Installation
 
 ### Quick Start
 
@@ -100,7 +100,7 @@ g++ -o actinium \
 
 ---
 
-## 🎯 Usage
+## Usage
 
 ### Basic Commands
 
@@ -164,7 +164,7 @@ g++ -o actinium \
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ### Project Structure
 
@@ -225,14 +225,14 @@ g++ -shared -o commands/mycommand/mycommand.dll commands/mycommand/mycommand.cpp
 ```
 
 This architecture enables:
-- ⚡ **Hot-Reloading** - Update commands without restarting
-- 🔌 **Modularity** - Each command is independent
-- 🛠️ **Customization** - Modify any command to suit your needs
-- 🚀 **Dynamic Loading** - Commands load on-demand
+- **Hot-Reloading** - Update commands without restarting
+- **Modularity** - Each command is independent
+- **Customization** - Modify any command to suit your needs
+- **Dynamic Loading** - Commands load on-demand
 
 ---
 
-## 🎨 Customization
+## Customization
 
 ### Modifying Built-in Commands
 
@@ -276,7 +276,7 @@ extern "C" __declspec(dllexport) void execute(const std::vector<std::string>& ar
 
 ---
 
-## 🗺️ Roadmap
+## Roadmap
 
 We have an ambitious roadmap for Actinium! See our [**detailed ROADMAP.md**](ROADMAP.md) for the complete feature list.
 
@@ -296,20 +296,20 @@ We have an ambitious roadmap for Actinium! See our [**detailed ROADMAP.md**](ROA
 - [ ] Multiple tabs/split screen
 - [ ] Git integration
 
-### Completed ✅
-- ✅ Basic shell interface
-- ✅ File system navigation
-- ✅ Dynamic command system
-- ✅ Auto-completion with fuzzy matching
-- ✅ Command history with frequency tracking
-- ✅ External command execution
-- ✅ Module creation/editing/compilation
+### Completed
+- [x] Basic shell interface
+- [x] File system navigation
+- [x] Dynamic command system
+- [x] Auto-completion with fuzzy matching
+- [x] Command history with frequency tracking
+- [x] External command execution
+- [x] Module creation/editing/compilation
 
 See [ROADMAP.md](ROADMAP.md) for the **complete list of 200+ planned features** organized into 20 development phases.
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are **welcome and encouraged**! Here's how you can help:
 
@@ -338,7 +338,7 @@ git push origin feature/amazing-feature
 
 ---
 
-## 📚 Documentation
+## Documentation
 
 ### Command Reference
 
@@ -371,7 +371,7 @@ Customize these values to adjust shell behavior.
 
 ---
 
-## 🐛 Known Issues
+## Known Issues
 
 - Windows-only (Linux/macOS ports in progress)
 - External editor dependency for `edit` command
@@ -381,19 +381,19 @@ Report issues at: [GitHub Issues](https://github.com/Arthur-91140/Actinium-Shell
 
 ---
 
-## 📜 License
+## License
 
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
 You are free to:
-- ✅ Use commercially
-- ✅ Modify
-- ✅ Distribute
-- ✅ Private use
+- Use commercially
+- Modify
+- Distribute
+- Private use
 
 ---
 
-## 🙏 Acknowledgements
+## Acknowledgements
 
 Special thanks to:
 
@@ -403,7 +403,7 @@ Special thanks to:
 
 ---
 
-## 👨‍💻 Author
+## Author
 
 **Arthur Pruvost Rivière**
 - GitHub: [@Arthur-91140](https://github.com/Arthur-91140)
@@ -413,18 +413,18 @@ Developed with passion and love for innovative terminal experiences ^^
 
 ---
 
-## 📞 Support
+## Support
 
-- 📖 [Documentation](ROADMAP.md)
-- 🐛 [Issue Tracker](https://github.com/Arthur-91140/Actinium-Shell/issues)
-- 💬 [Discussions](https://github.com/Arthur-91140/Actinium-Shell/discussions)
+- [Documentation](ROADMAP.md)
+- [Issue Tracker](https://github.com/Arthur-91140/Actinium-Shell/issues)
+- [Discussions](https://github.com/Arthur-91140/Actinium-Shell/discussions)
 
 ---
 
 <div align="center">
 
-**⭐ Star this project if you find it interesting! ⭐**
+**Star this project if you find it interesting!**
 
-Made with ❤️ and C++
+Made with C++
 
 </div>
